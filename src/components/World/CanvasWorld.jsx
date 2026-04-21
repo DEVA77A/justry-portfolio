@@ -3,6 +3,9 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Environment, PerspectiveCamera, MeshDistortMaterial, Float, Stars, Torus, Html, Sparkles } from '@react-three/drei';
 import * as THREE from 'three';
 import gsap from 'gsap';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import FloatingJustry from './FloatingJustry';
+import CelestialDebris from './CelestialDebris';
 
 // -------------------------------------------------------------
 // CAMERA CONTROLLER: Flies to regions with compositional offsetting
@@ -233,15 +236,16 @@ function RegionContact({ setActiveLocation, isActive }) {
 // -------------------------------------------------------------
 // MAIN WORLD
 // -------------------------------------------------------------
-export default function CanvasWorld({ activeLocation, setActiveLocation }) {
+export default function CanvasWorld({ activeLocation, setActiveLocation, onOrbCollect }) {
   return (
     <Canvas
       camera={{ fov: 45, position: [0, 0, 40] }}
       onPointerMissed={() => { if (activeLocation !== 'intro') setActiveLocation('orbit') }}
     >
       <color attach="background" args={['#020202']} />
-      <fog attach="fog" args={['#020202', 15, 70]} />
+      <fog attach="fog" args={['#020202', 15, 150]} />
       <Stars radius={100} depth={50} count={5000} factor={6} saturation={0} fade speed={1.5} />
+      <CelestialDebris />
 
       <ambientLight intensity={0.2} />
       <directionalLight position={[10, 20, 10]} intensity={1.5} color="#C9A227" />
@@ -256,6 +260,12 @@ export default function CanvasWorld({ activeLocation, setActiveLocation }) {
         <planeGeometry args={[200, 200]} />
         <meshStandardMaterial color="#050505" wireframe transparent opacity={0.05} />
       </mesh>
+
+      <FloatingJustry onOrbCollect={onOrbCollect} />
+
+      <EffectComposer disableNormalPass>
+        <Bloom luminanceThreshold={1} mipmapBlur intensity={0.5} />
+      </EffectComposer>
 
       <CameraRig activeLocation={activeLocation} />
     </Canvas>
